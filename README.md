@@ -1,45 +1,136 @@
-# factory-data-system
-# Gerçek Zamanlı Sensör Veri Sistemi
+# factory-data-system  
+# Gerçek Zamanlı Sensör Veri Sistemi (Python + MSSQL + REST API)
 
-## Proje Açıklaması
-Bu proje, Python kullanarak sahte sensör verisi üretir ve bu verileri her saniye Microsoft SQL Server veritabanına kaydeder. Ayrıca veriler CSV dosyasına da yazılır.
+Bu proje, fabrikadaki sensör verilerini simüle eden ve bu verileri Microsoft SQL Server veritabanına kaydeden ve REST API üzerinden erişilebilir hale getiren bir backend sistemidir.
+
+* Dashboard henüz geliştirme aşamasındadır. Bu repo şu anda sadece veri üretimi, veritabanı ve API katmanını içerir.
 
 ---
 
-## Kullanılan Teknolojiler
+#  Önemli Güncelleme (CSV → MSSQL)
+
+Eski sistem:
+- Veriler CSV dosyasına yazılıyordu
+- Dosya üzerinden veri okunuyordu
+
+Yeni sistem:
+- CSV kullanımı kaldırıldı 
+- Veriler doğrudan MSSQL veritabanına yazılıyor ✔
+- Verilere REST API üzerinden erişiliyor ✔
+- Sistem artık gerçek backend mimarisine uygun hale getirildi ✔
+
+CSV dosyası sadece eski sürüm referansı olarak repoda bulunabilir.
+
+---
+
+#  Proje Yapısı
+
+factory-data-system/
+│
+├── src/
+│   ├── main.py        # Sensör verisi üretir ve DB’ye gönderir
+│   ├── database.py    # MSSQL bağlantısı ve veri işlemleri
+│   ├──api.py          # REST API servisi
+│   ├── requirements.txt
+│   └── README.md
+│
+└── archive/
+    ├──sensor_simulator.py    # Eski Script tek dosyada çalışır
+    └──sensor_data.csv        # Değerler buraya yazılır
+
+---
+
+#  Kullanılan Teknolojiler
+
 - Python
 - Microsoft SQL Server
-- pyodbc kütüphanesi
-- CSV dosya sistemi
+- FastAPI
+- Uvicorn
+- pyodbc
 
 ---
 
-## Proje Nasıl Çalışır?
+#  Veritabanı Kurulumu
 
-1. Python sürekli olarak rastgele sensör verisi üretir (sıcaklık, basınç, üretim)
-2. Bu veriler her 1 saniyede bir güncellenir
-3. Veriler hem CSV dosyasına hem de SQL Server veritabanına yazılır
-4. SQL Server’da tablo içinde saklanır ve sorgulanabilir
+SQL Server Management Studio’da aşağıdaki dosya çalıştırılır:
 
----
+database_setup.sql
 
-## Veritabanı Kurulumu
-
-1. SQL Server Management Studio açılır
-2. database_setup.sql dosyası çalıştırılır
-3. FactoryDB veritabanı ve SensorData tablosu oluşturulur
+Bu işlem:
+- FactoryDB veritabanını oluşturur
+- SensorData tablosunu oluşturur
 
 ---
 
-## Çalıştırma
+#  Veritabanı Bağlantısı
 
-1. Gerekli kütüphane kurulumu:
-   pip install pyodbc
+database.py dosyasında şu bilgileri düzenle:
 
-2. Python dosyasını çalıştır:
-   python sensor_to_mssql.py
+SERVER = "YOUR_SERVER"
+DATABASE = "FactoryDB"
+USERNAME = "YOUR_USERNAME"
+PASSWORD = "YOUR_PASSWORD"
 
 ---
 
-## Proje Amacı
-Gerçek zamanlı veri akış sistemlerini öğrenmek, Python ile veritabanı bağlantısını anlamak ve basit IoT simülasyonu oluşturmak.
+#  Kurulum
+
+pip install -r requirements.txt
+
+---
+
+# ▶ Sensör Simülasyonunu Çalıştırma
+
+cd src
+python main.py
+
+Bu işlem:
+- Rastgele sensör verisi üretir
+- Verileri MSSQL veritabanına kaydeder
+
+---
+
+#  API’yi Çalıştırma
+
+cd src
+uvicorn api:app --reload
+
+Sunucu çalışınca:
+
+http://127.0.0.1:8000
+
+---
+
+#  API Dokümantasyonu
+
+Swagger UI:
+
+http://127.0.0.1:8000/docs
+
+---
+
+#  API Endpointleri
+
+GET /sensor
+
+Bu endpoint:
+- MSSQL’den son sensör verilerini çeker
+- JSON formatında döndürür
+
+---
+
+#  Sistem Çalışma Mantığı
+
+1. Python sensör verisi üretir (sıcaklık, basınç, üretim)
+2. Veriler MSSQL veritabanına kaydedilir
+3. FastAPI bu verileri API üzerinden sunar
+4. İleride dashboard bu API’den veri çekecektir
+
+---
+
+#  Proje Amacı
+
+- Python ile veri üretimi simülasyonu
+- MSSQL veritabanı kullanımı
+- REST API geliştirme
+- Gerçek backend sistem mimarisini öğrenmek
